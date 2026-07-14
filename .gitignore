@@ -33,3 +33,6 @@ next-env.d.ts
 
 # generated credentials (contains real passwords, never commit)
 credentials.txt
+
+.vercel
+.env*
