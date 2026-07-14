@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  MUITO_FACIL
+  FACIL
+  MEDIO
+  DIFICIL
+  MUITO_DIFICIL
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  scores    Score[]
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  cards       Card[]
+  scores      Score[]
+}
+
+model Card {
+  id         String     @id @default(cuid())
+  deckId     String
+  deck       Deck       @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  question   String
+  answer     String
+  difficulty Difficulty
+  order      Int
+
+  @@index([deckId])
+}
+
+// Best saved percentage per user per deck. Can only improve every 15 days.
+model Score {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deckId        String
+  deck          Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  percentage    Int
+  attempts      Int      @default(1)
+  lastPlayedAt  DateTime @default(now())
+  lastUpdatedAt DateTime @default(now())
+
+  @@unique([userId, deckId])
+}
